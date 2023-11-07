@@ -41,11 +41,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: BlocProvider(
+        home: Scaffold(
+      body: BlocProvider(
         create: (context) => CartCubit(),
         child: MovieListScreen(),
       ),
-    );
+    ));
   }
 }
 
@@ -72,9 +73,7 @@ class MovieList extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-
           final movies = snapshot.data;
-
           return ListView.builder(
             itemCount: movies!.length,
             itemBuilder: (context, index) {
@@ -124,26 +123,28 @@ class ShoppingCartScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Carrito'),
       ),
-      body: BlocBuilder<CartCubit, CartState>(
-        builder: (context, state) {
-          final cart = state.movies;
-          return ListView.builder(
-            itemCount: cart.length,
-            itemBuilder: (context, index) {
-              final movie = cart[index];
-              return ListTile(
-                title: Text(movie.title),
-                trailing: IconButton(
-                  icon: const Icon(Icons.remove_shopping_cart),
-                  onPressed: () {
-                    context.read<CartCubit>().removeFromCart(movie);
-                  },
-                ),
-              );
-            },
-          );
-        },
-      ),
+      body: Builder(builder: (context) {
+        return BlocBuilder<CartCubit, CartState>(
+          builder: (context, state) {
+            final cart = state.movies;
+            return ListView.builder(
+              itemCount: cart.length,
+              itemBuilder: (context, index) {
+                final movie = cart[index];
+                return ListTile(
+                  title: Text(movie.title),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.remove_shopping_cart),
+                    onPressed: () {
+                      context.read<CartCubit>().removeFromCart(movie);
+                    },
+                  ),
+                );
+              },
+            );
+          },
+        );
+      }),
     );
   }
 }
