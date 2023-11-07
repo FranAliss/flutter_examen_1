@@ -38,19 +38,33 @@ class MovieService {
 }
 
 class MyApp extends StatelessWidget {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
+
+  void showShoppingCart() {
+    _navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) {
+      return ShoppingCartScreen();
+    }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-      body: BlocProvider(
-        create: (context) => CartCubit(),
-        child: MovieListScreen(),
+      navigatorKey: _navigatorKey,
+      home: Scaffold(
+        body: BlocProvider(
+          create: (context) => CartCubit(),
+          child: MovieListScreen(showShoppingCart),
+        ),
       ),
-    ));
+    );
   }
 }
 
 class MovieListScreen extends StatelessWidget {
+  final Function showShoppingCart;
+
+  MovieListScreen(this.showShoppingCart);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,7 +72,7 @@ class MovieListScreen extends StatelessWidget {
         title: const Text('Peliculas App'),
       ),
       body: MovieList(),
-      floatingActionButton: ShoppingCartButton(),
+      floatingActionButton: ShoppingCartButton(showShoppingCart),
     );
   }
 }
@@ -98,12 +112,15 @@ class MovieList extends StatelessWidget {
 }
 
 class ShoppingCartButton extends StatelessWidget {
+  final Function showShoppingCart;
+
+  ShoppingCartButton(this.showShoppingCart);
+
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => ShoppingCartScreen()));
+        showShoppingCart();
       },
       label: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
