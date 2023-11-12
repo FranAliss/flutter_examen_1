@@ -39,10 +39,11 @@ class MovieService {
 
 class MyApp extends StatelessWidget {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
+  final CartCubit cartCubit = CartCubit();
 
   void showShoppingCart() {
     _navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) {
-      return ShoppingCartScreen();
+      return ShoppingCartScreen(cartCubit: cartCubit);
     }));
   }
 
@@ -52,7 +53,7 @@ class MyApp extends StatelessWidget {
       navigatorKey: _navigatorKey,
       home: Scaffold(
         body: BlocProvider(
-          create: (context) => CartCubit(),
+          create: (context) => cartCubit, // Use the existing CartCubit instance
           child: MovieListScreen(showShoppingCart),
         ),
       ),
@@ -133,35 +134,44 @@ class ShoppingCartButton extends StatelessWidget {
   }
 }
 
-class ShoppingCartScreen extends StatelessWidget {
+class ShoppingCartScreen extends StatefulWidget {
+  final CartCubit cartCubit;
+
+  ShoppingCartScreen({required this.cartCubit});
+
+  @override
+  _ShoppingCartScreenState createState() => _ShoppingCartScreenState();
+}
+
+class _ShoppingCartScreenState extends State<ShoppingCartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Carrito'),
       ),
-      body: Builder(builder: (context) {
-        return BlocBuilder<CartCubit, CartState>(
-          builder: (context, state) {
-            final cart = state.movies;
-            return ListView.builder(
-              itemCount: cart.length,
-              itemBuilder: (context, index) {
-                final movie = cart[index];
-                return ListTile(
-                  title: Text(movie.title),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.remove_shopping_cart),
-                    onPressed: () {
-                      context.read<CartCubit>().removeFromCart(movie);
-                    },
-                  ),
-                );
-              },
-            );
-          },
-        );
-      }),
+      body: BlocBuilder<CartCubit, CartState>(
+        bloc: widget
+            .cartCubit, // Use widget.cartCubit to access the passed instance
+        builder: (context, state) {
+          final cart = state.movies;
+          return ListView.builder(
+            itemCount: cart.length,
+            itemBuilder: (context, index) {
+              final movie = cart[index];
+              return ListTile(
+                title: Text(movie.title),
+                trailing: IconButton(
+                  icon: const Icon(Icons.remove_shopping_cart),
+                  onPressed: () {
+                    widget.cartCubit.removeFromCart(movie);
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
